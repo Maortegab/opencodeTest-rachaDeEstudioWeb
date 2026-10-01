@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contador de Rachas de Estudio</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <h1 class="app__title">Racha de Estudio</h1>
+      <p class="app__subtitle">Registra tus sesiones y mantén la constancia.</p>
+    </header>
+
+    <main class="app__main">
+      <section class="card streak" aria-labelledby="streak-title">
+        <h2 class="card__title" id="streak-title">Racha actual</h2>
+        <div class="streak__value">
+          <span class="streak__number" id="streak-number">0</span>
+          <span class="streak__unit">días</span>
+        </div>
+        <p class="streak__status" id="streak-status">Sin registros todavía.</p>
+        <dl class="stats">
+          <div class="stats__item">
+            <dt>Total Accumulado</dt>
+            <dd id="stat-total-time">0 min</dd>
+          </div>
+          <div class="stats__item">
+            <dt>Días Registrados</dt>
+            <dd id="stat-total-days">0</dd>
+          </div>
+          <div class="stats__item">
+            <dt>Mejor Racha</dt>
+            <dd id="stat-best-streak">0 días</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="card" aria-labelledby="form-title">
+        <h2 class="card__title" id="form-title">Nueva sesión</h2>
+        <form class="form" id="session-form" novalidate>
+          <div class="field">
+            <label class="field__label" for="topic">Tema de estudio</label>
+            <input
+              class="field__input"
+              type="text"
+              id="topic"
+              name="topic"
+              placeholder="Ej. Cálculo diferencial"
+              autocomplete="off"
+              maxlength="80"
+            >
+            <p class="field__error" id="topic-error" role="alert" hidden></p>
+          </div>
+
+          <div class="field">
+            <label class="field__label" for="minutes">Tiempo (minutos)</label>
+            <input
+              class="field__input"
+              type="number"
+              id="minutes"
+              name="minutes"
+              placeholder="Ej. 45"
+              min="1"
+              max="1440"
+              step="1"
+              inputmode="numeric"
+            >
+            <p class="field__error" id="minutes-error" role="alert" hidden></p>
+          </div>
+
+          <p class="form__date">Se registrará con la fecha de hoy: <strong id="today-date">—</strong></p>
+
+          <button class="btn" type="submit">Guardar</button>
+          <p class="form__success" id="form-success" role="status" hidden></p>
+        </form>
+      </section>
+
+      <section class="card sessions" aria-labelledby="sessions-title">
+        <div class="sessions__head">
+          <h2 class="card__title" id="sessions-title">Sesiones registradas</h2>
+          <button class="btn btn--ghost" type="button" id="clear-all">Borrar todo</button>
+        </div>
+        <div class="sessions__list-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Tema</th>
+                <th scope="col" class="table__num">Minutos</th>
+              </tr>
+            </thead>
+            <tbody id="sessions-body"></tbody>
+          </table>
+          <p class="sessions__empty" id="sessions-empty">
+            Aún no hay sesiones. Registra la primera para empezar tu racha.
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
