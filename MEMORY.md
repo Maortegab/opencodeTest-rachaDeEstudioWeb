@@ -14,7 +14,7 @@ local por navegador.
 
 | Archivo | Rol |
 |---|---|
-| `index.html` | Estructura. 3 tarjetas: racha+stats, formulario, tabla. 15 ids que `app.js` busca por nombre. |
+| `index.html` | Estructura. 3 tarjetas: racha+stats, formulario, tabla. 16 ids que `app.js` busca por nombre. |
 | `styles.css` | Grid responsive + variables de tema claro/oscuro. Sin frameworks. |
 | `app.js` | Toda la lógica: storage, racha, validación, render. Script global, sin módulos. |
 
@@ -26,28 +26,27 @@ Clave `localStorage`: `studyStreak.sessions`. Un array de sesiones:
 { id: string, topic: string, minutes: number, date: "YYYY-MM-DD", createdAt: ISO/UTC }
 ```
 
-- `date` es la clave de día, en **hora local** (`toDateKey`, app.js). Cuenta una vez por racha aunque
-  haya varias sesiones ese día.
-- `createdAt` es UTC y solo ordena sesiones dentro del mismo día.
-- La fecha la pone la app desde `new Date()` en el submit; el usuario nunca la escribe.
+- `date` es la clave de día en **hora local** (`toDateKey`); `createdAt` es UTC y solo ordena sesiones
+  dentro del mismo día. La fecha la pone la app en el submit; el usuario nunca la escribe.
 
 ## Puntos de entrada (app.js)
 
 - `loadSessions()` / `saveSessions()` — leer y escribir storage, con filtro de entradas malformadas.
-- `calculateStats(sessions)` — función pura y sin DOM. Devuelve `{streak, best, alive, today,
-  totalMinutes, totalDays}`. **Es el corazón de la app y la única parte con lógica real.**
+- `calculateStats(sessions)` — función pura y sin DOM. Devuelve `{streak, best, alive, today, weekStart,
+  weekMinutes, totalMinutes, totalDays}`. **Es el corazón de la app y la única parte con lógica real.**
 - `render()` — recalcula stats y redibuja todo el DOM desde cero, sin diff. Se llama tras cada cambio.
 - `validate()` — límites de tema (1–80) y minutos (entero 1–1440).
 
-## Cálculo de racha (resumen)
+## Racha y semana (resumen)
 
-Sobre un `Set` de fechas únicas ordenadas. Si hay sesión **hoy** → cuenta hacia atrás desde hoy.
-Si no hay hoy pero **sí ayer** → la racha sigue viva, marcada "en riesgo" (`alive: false`). Si no →
-0. `best` se calcula aparte con un barrido de rachas consecutivas y no depende de la actual.
+La racha cuenta **días únicos** sobre un `Set` de fechas ordenadas; hoy o ayer la mantienen viva
+(sin hoy, `alive: false` = "en riesgo"), y `best` se barre aparte. `weekStartKey()` saca el **lunes**
+de la semana de una fecha (`(getDay() + 6) % 7`) y `weekMinutes` suma los minutos de las sesiones con
+`weekStart <= date <= hoy`: al revés que la racha, **acumula minutos y no deduplica días**. Se muestra
+como cuarto item del `<dl class="stats">`.
 
 ## Verificar cambios
 
-Sin runner de tests ni linter: `node --check app.js` para sintaxis. Para probar `calculateStats`,
-leer el archivo, quitar el `render();` final y correrlo con `new Function("module","require", src)`
-con stubs de `document`, `localStorage`, `crypto`. La UI solo se verifica abriendo `index.html`
-con doble clic (`file://`).
+Sin runner de tests ni linter: `node --check app.js` para sintaxis, y el harness de `new Function`
+descrito en `AGENTS.md` para probar `calculateStats` (añade un `Date` falso para fijar el "hoy" de los
+fixtures). La UI solo se verifica abriendo `index.html` con doble clic (`file://`).

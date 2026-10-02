@@ -14,6 +14,7 @@ const el = {
   statTotalTime: document.getElementById("stat-total-time"),
   statTotalDays: document.getElementById("stat-total-days"),
   statBestStreak: document.getElementById("stat-best-streak"),
+  statWeekTime: document.getElementById("stat-week-time"),
   sessionsBody: document.getElementById("sessions-body"),
   sessionsEmpty: document.getElementById("sessions-empty"),
   clearAll: document.getElementById("clear-all"),
@@ -31,6 +32,12 @@ function shiftDays(dateKey, delta) {
   const date = new Date(y, m - 1, d);
   date.setDate(date.getDate() + delta);
   return toDateKey(date);
+}
+
+function weekStartKey(dateKey) {
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const offset = (new Date(y, m - 1, d).getDay() + 6) % 7;
+  return shiftDays(dateKey, -offset);
 }
 
 function loadSessions() {
@@ -76,7 +83,12 @@ function calculateStats(sessions) {
 
   const totalMinutes = sessions.reduce((sum, s) => sum + s.minutes, 0);
 
-  return { streak, best, alive, today, totalMinutes, totalDays: days.length };
+  const weekStart = weekStartKey(today);
+  const weekMinutes = sessions
+    .filter((s) => s.date >= weekStart && s.date <= today)
+    .reduce((sum, s) => sum + s.minutes, 0);
+
+  return { streak, best, alive, today, weekStart, weekMinutes, totalMinutes, totalDays: days.length };
 }
 
 function formatMinutes(minutes) {
@@ -108,6 +120,7 @@ function renderStats(stats) {
   el.statTotalTime.textContent = formatMinutes(stats.totalMinutes);
   el.statTotalDays.textContent = stats.totalDays;
   el.statBestStreak.textContent = stats.best === 1 ? "1 día" : `${stats.best} días`;
+  el.statWeekTime.textContent = formatMinutes(stats.weekMinutes);
 }
 
 function renderSessions(sessions, today) {

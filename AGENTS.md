@@ -25,7 +25,7 @@ Abrir `index.html` con doble clic (`file://`). No hay dev server.
   plano. `type="module"` falla bajo `file://` por CORS, así que un solo `<script src="app.js">`
   al final de `<body>` es lo que funciona hoy.
 - `app.js` no tiene `import`/`export`: es script global. Al cargar ejecuta `getElementById` de los
-  15 ids en el tope y llama `render()` inmediatamente. **Moverlo a `<head>` sin `defer` rompe la app**;
+  16 ids en el tope y llama `render()` inmediatamente. **Moverlo a `<head>` sin `defer` rompe la app**;
   si lo mueves, añade `defer`.
 - Cada `getElementById` de `app.js` debe existir como `id` en `index.html`. Al agregar campos,
   actualiza ambos archivos.
@@ -44,6 +44,17 @@ Abrir `index.html` con doble clic (`file://`). No hay dev server.
     "en riesgo"). No devuelvas 0 en ese caso.
   - Hueco de un solo día → la racha se reinicia; la **mejor racha histórica** se calcula aparte y no
     depende de la actual.
+
+## Semana en curso
+
+- `weekStartKey(dateKey)` devuelve el **lunes** de esa semana: retrocede `(getDay() + 6) % 7` sobre una
+  fecha en medianoche local. No uses `getDay()` directo (arrancaría en domingo) ni `startOfWeek` de
+  una librería.
+- `weekMinutes` **suma minutos de todas las sesiones** del rango, no deduplica por día: es lo
+  contrario que la racha a propósito. Múltiples sesiones del mismo día deben sumar todas.
+- El rango se filtra por comparación de strings `weekStart <= s.date <= today`. Es válido porque
+  `YYYY-MM-DD` es de longitud fija y con ceros a la izquierda (lexicográfico = cronológico); no
+  hacen falta `Date` ni UTC aquí. El `<= today` deja fuera sesiones con `date` futuro o corrupta.
 
 ## Estado y persistencia
 

@@ -71,6 +71,10 @@ body {
     grid-template-columns: 1fr 1fr;
   }
 
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .sessions {
     grid-column: 1 / -1;
   }
@@ -121,7 +125,7 @@ body {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   margin: 20px 0 0;
   padding-top: 16px;
