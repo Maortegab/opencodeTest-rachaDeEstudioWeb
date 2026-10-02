@@ -3,46 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contador de Rachas de Estudio</title>
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Registra tus sesiones de estudio y mantén la constancia día a día.">
+  <title>Racha de Estudio</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app">
-    <header class="app__header">
-      <h1 class="app__title">Racha de Estudio</h1>
-      <p class="app__subtitle">Registra tus sesiones y mantén la constancia.</p>
+    <header class="masthead">
+      <h1 class="masthead__title">Racha de estudio</h1>
+      <p class="masthead__date" id="today-date">—</p>
     </header>
 
-    <main class="app__main">
-      <section class="card streak" aria-labelledby="streak-title">
-        <h2 class="card__title" id="streak-title">Racha actual</h2>
-        <div class="streak__value">
+    <main class="main">
+      <section class="streak" id="streak-panel" aria-labelledby="streak-title">
+        <h2 class="panel__title" id="streak-title">Racha actual</h2>
+
+        <p class="streak__value">
           <span class="streak__number" id="streak-number">0</span>
-          <span class="streak__unit">días</span>
-        </div>
+          <span class="streak__unit">días seguidos</span>
+        </p>
         <p class="streak__status" id="streak-status">Sin registros todavía.</p>
+
+        <ol class="ribbon" id="ribbon" role="img" aria-label="Actividad de las últimas cinco semanas."></ol>
+        <p class="ribbon__caption">Esta semana: <span class="ribbon__caption-value" id="stat-week-time">0 min</span></p>
+
         <dl class="stats">
           <div class="stats__item">
-            <dt>Total Accumulado</dt>
+            <dt>Tiempo acumulado</dt>
             <dd id="stat-total-time">0 min</dd>
           </div>
           <div class="stats__item">
-            <dt>Días Registrados</dt>
+            <dt>Días con registro</dt>
             <dd id="stat-total-days">0</dd>
           </div>
           <div class="stats__item">
-            <dt>Mejor Racha</dt>
+            <dt>Mejor racha</dt>
             <dd id="stat-best-streak">0 días</dd>
-          </div>
-          <div class="stats__item">
-            <dt>Esta semana</dt>
-            <dd id="stat-week-time">0 min</dd>
           </div>
         </dl>
       </section>
 
-      <section class="card" aria-labelledby="form-title">
-        <h2 class="card__title" id="form-title">Nueva sesión</h2>
+      <section class="entry" aria-labelledby="form-title">
+        <h2 class="panel__title" id="form-title">Nueva sesión</h2>
         <form class="form" id="session-form" novalidate>
           <div class="field">
             <label class="field__label" for="topic">Tema de estudio</label>
@@ -59,32 +62,38 @@
           </div>
 
           <div class="field">
-            <label class="field__label" for="minutes">Tiempo (minutos)</label>
+            <label class="field__label" for="minutes">Minutos estudiados</label>
             <input
-              class="field__input"
+              class="field__input field__input--num"
               type="number"
               id="minutes"
               name="minutes"
-              placeholder="Ej. 45"
+              placeholder="0"
               min="1"
               max="1440"
               step="1"
               inputmode="numeric"
             >
             <p class="field__error" id="minutes-error" role="alert" hidden></p>
+            <div class="chips" id="quick-minutes" role="group" aria-label="Minutos sugeridos">
+              <button class="chip" type="button" data-minutes="25" aria-label="25 minutos">25</button>
+              <button class="chip" type="button" data-minutes="45" aria-label="45 minutos">45</button>
+              <button class="chip" type="button" data-minutes="60" aria-label="60 minutos">60</button>
+              <button class="chip" type="button" data-minutes="90" aria-label="90 minutos">90</button>
+            </div>
           </div>
 
-          <p class="form__date">Se registrará con la fecha de hoy: <strong id="today-date">—</strong></p>
+          <p class="form__note">Se guarda con la fecha de hoy.</p>
 
-          <button class="btn" type="submit">Guardar</button>
+          <button class="btn" type="submit">Guardar sesión</button>
           <p class="form__success" id="form-success" role="status" hidden></p>
         </form>
       </section>
 
-      <section class="card sessions" aria-labelledby="sessions-title">
+      <section class="sessions" aria-labelledby="sessions-title">
         <div class="sessions__head">
-          <h2 class="card__title" id="sessions-title">Sesiones registradas</h2>
-          <button class="btn btn--ghost" type="button" id="clear-all">Borrar todo</button>
+          <h2 class="panel__title" id="sessions-title">Sesiones registradas</h2>
+          <button class="btn btn--quiet" type="button" id="clear-all">Borrar todo</button>
         </div>
         <div class="sessions__list-wrap">
           <table class="table">
@@ -98,7 +107,7 @@
             <tbody id="sessions-body"></tbody>
           </table>
           <p class="sessions__empty" id="sessions-empty">
-            Aún no hay sesiones. Registra la primera para empezar tu racha.
+            Todavía no hay sesiones. Registra la primera para encender el primer día.
           </p>
         </div>
       </section>

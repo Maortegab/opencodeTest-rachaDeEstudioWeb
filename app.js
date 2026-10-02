@@ -1,16 +1,21 @@
 const STORAGE_KEY = "studyStreak.sessions";
 const MAX_MINUTES = 1440;
+const RIBBON_WEEKS = 5;
+const RIBBON_DAYS = RIBBON_WEEKS * 7;
 
 const el = {
   form: document.getElementById("session-form"),
   topic: document.getElementById("topic"),
   minutes: document.getElementById("minutes"),
+  quickMinutes: document.getElementById("quick-minutes"),
   topicError: document.getElementById("topic-error"),
   minutesError: document.getElementById("minutes-error"),
   success: document.getElementById("form-success"),
   todayDate: document.getElementById("today-date"),
+  streakPanel: document.getElementById("streak-panel"),
   streakNumber: document.getElementById("streak-number"),
   streakStatus: document.getElementById("streak-status"),
+  ribbon: document.getElementById("ribbon"),
   statTotalTime: document.getElementById("stat-total-time"),
   statTotalDays: document.getElementById("stat-total-days"),
   statBestStreak: document.getElementById("stat-best-streak"),
@@ -109,12 +114,62 @@ function formatDate(dateKey) {
 
 function streakMessage(stats) {
   if (stats.totalDays === 0) return "Sin registros todavía. Empieza hoy.";
-  if (!stats.alive) return "Racha en riesgo: no hay registro hoy. Estudia para continuarla.";
+  if (!stats.alive) return "Racha en riesgo: hoy todavía no hay sesión. Se rompe si no estudias antes de medianoche.";
   if (stats.streak === 1) return "Racha iniciada. Vuelve mañana para mantenerla.";
   return `Racha viva: ${stats.streak} días consecutivos.`;
 }
 
+function streakState(stats) {
+  if (stats.totalDays === 0) return "empty";
+  return stats.alive ? "alive" : "risk";
+}
+
+function ribbonLevel(minutes) {
+  if (minutes < 30) return 1;
+  if (minutes < 90) return 2;
+  return 3;
+}
+
+function renderRibbon(stats, sessions) {
+  const minutesByDay = new Map();
+  for (const session of sessions) {
+    minutesByDay.set(session.date, (minutesByDay.get(session.date) || 0) + session.minutes);
+  }
+
+  const keys = [];
+  for (let back = RIBBON_DAYS - 1; back >= 0; back -= 1) {
+    keys.push(shiftDays(stats.today, -back));
+  }
+
+  let loggedDays = 0;
+  let windowMinutes = 0;
+  const cells = keys.map((key) => {
+    const cell = document.createElement("li");
+    cell.className = "ribbon__day";
+    const minutes = minutesByDay.get(key);
+    if (minutes === undefined) {
+      cell.title = `${formatDate(key)} · sin registro`;
+    } else {
+      cell.dataset.level = String(ribbonLevel(minutes));
+      cell.title = `${formatDate(key)} · ${formatMinutes(minutes)}`;
+      loggedDays += 1;
+      windowMinutes += minutes;
+    }
+    if (key === stats.today) cell.classList.add("is-today");
+    return cell;
+  });
+
+  el.ribbon.replaceChildren(...cells);
+  el.ribbon.setAttribute(
+    "aria-label",
+    `Últimas ${RIBBON_WEEKS} semanas: ${loggedDays} ${
+      loggedDays === 1 ? "día con sesión" : "días con sesión"
+    }, ${formatMinutes(windowMinutes)} en total. ${streakMessage(stats)}`
+  );
+}
+
 function renderStats(stats) {
+  el.streakPanel.dataset.state = streakState(stats);
   el.streakNumber.textContent = stats.streak;
   el.streakStatus.textContent = streakMessage(stats);
   el.statTotalTime.textContent = formatMinutes(stats.totalMinutes);
@@ -160,6 +215,7 @@ function render() {
   const sessions = loadSessions();
   const stats = calculateStats(sessions);
   renderStats(stats);
+  renderRibbon(stats, sessions);
   renderSessions(sessions, stats.today);
   el.todayDate.textContent = formatDate(stats.today);
   el.clearAll.hidden = sessions.length === 0;
@@ -229,9 +285,17 @@ el.form.addEventListener("submit", (event) => {
 
   el.form.reset();
   el.topic.focus();
-  el.success.textContent = `Guardado: ${formatMinutes(minutes)} de ${topic}.`;
+  el.success.textContent = `Guardado ${formatMinutes(minutes)} de ${topic}.`;
   el.success.hidden = false;
   render();
+});
+
+el.quickMinutes.addEventListener("click", (event) => {
+  const chip = event.target.closest("[data-minutes]");
+  if (!chip) return;
+  el.minutes.value = chip.dataset.minutes;
+  clearError(el.minutes, el.minutesError);
+  el.minutes.focus();
 });
 
 el.clearAll.addEventListener("click", () => {
