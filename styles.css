@@ -127,6 +127,39 @@ body {
   color: var(--ink-soft);
 }
 
+.streak__figure {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.streak__flame {
+  display: inline-flex;
+  color: var(--accent);
+  transform-origin: 50% 85%;
+  animation: flame-flicker 1.6s ease-in-out infinite;
+  transition: color 0.2s ease;
+}
+
+.streak__flame svg {
+  display: block;
+  width: clamp(1.75rem, 6.5vw, 3rem);
+  height: auto;
+}
+
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.40);
+    opacity: 0.60;
+  }
+}
+
 .streak__status {
   margin: 8px 0 0;
   max-width: 46ch;
@@ -139,6 +172,15 @@ body {
 
 .streak[data-state="empty"] .streak__number {
   color: var(--ink-soft);
+}
+
+.streak[data-state="risk"] .streak__flame {
+  color: var(--brass);
+  animation-duration: 4s;
+}
+
+.streak[data-state="empty"] .streak__flame {
+  display: none;
 }
 
 .ribbon {
@@ -490,5 +532,6 @@ body {
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

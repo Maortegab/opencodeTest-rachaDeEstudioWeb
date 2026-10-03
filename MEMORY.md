@@ -1,20 +1,18 @@
 # MEMORY.md
 
-Contexto de la aplicación. Mantener bajo 50 líneas: **borra lo que ya no sea cierto o ya esté en
-`AGENTS.md`** (allí viven reglas de trabajo, estilo y trampas). Este archivo responde "cómo es esta
-app y dónde está cada cosa".
+Contexto de la aplicación. Mantener bajo 50 líneas: **borra lo que ya no sea cierto o ya esté en `AGENTS.md`**
+(allí viven reglas de trabajo, estilo y trampas). Responde "cómo es esta app y dónde está cada cosa".
 
 ## Qué es
 
-Contador de rachas de estudio. El usuario registra sesiones (tema + minutos) y la app calcula
-cuántos días consecutivos lleva estudiando. Sin backend, sin login, sin usuarios: una sola racha
-local por navegador.
+Contador de rachas de estudio: el usuario registra sesiones (tema + minutos) y la app calcula los
+días consecutivos de estudio. Sin backend, login ni usuarios: una sola racha local por navegador.
 
 ## Archivos
 
 | Archivo | Rol |
 |---|---|
-| `index.html` | Estructura. 3 tarjetas: racha+stats, formulario, tabla. 16 ids que `app.js` busca por nombre. |
+| `index.html` | Estructura. 3 tarjetas: racha+stats, formulario, tabla. 19 ids que `app.js` busca por nombre. |
 | `styles.css` | Grid responsive + variables de tema claro/oscuro. Sin frameworks. |
 | `app.js` | Toda la lógica: storage, racha, validación, render. Script global, sin módulos. |
 
@@ -40,13 +38,12 @@ Clave `localStorage`: `studyStreak.sessions`. Un array de sesiones:
 ## Racha y semana (resumen)
 
 La racha cuenta **días únicos** sobre un `Set` de fechas ordenadas; hoy o ayer la mantienen viva
-(sin hoy, `alive: false` = "en riesgo"), y `best` se barre aparte. `weekStartKey()` saca el **lunes**
-de la semana de una fecha (`(getDay() + 6) % 7`) y `weekMinutes` suma los minutos de las sesiones con
-`weekStart <= date <= hoy`: al revés que la racha, **acumula minutos y no deduplica días**. Se muestra
-como cuarto item del `<dl class="stats">`.
+(sin hoy, `alive: false` = "en riesgo"). `weekStartKey()` saca el **lunes** de la semana de una fecha
+(`(getDay() + 6) % 7`) y `weekMinutes` suma los minutos de las sesiones con `weekStart <= date <= hoy`:
+al revés que la racha, **acumula minutos y no deduplica días**. El fuego junto al número es decorativo
+(`aria-hidden`): visibilidad y tono salen de `data-state` por CSS, `app.js` no lo toca.
 
 ## Verificar cambios
 
-Sin runner de tests ni linter: `node --check app.js` para sintaxis, y el harness de `new Function`
-descrito en `AGENTS.md` para probar `calculateStats` (añade un `Date` falso para fijar el "hoy" de los
-fixtures). La UI solo se verifica abriendo `index.html` con doble clic (`file://`).
+`node --check app.js` para sintaxis; el harness de `new Function` de `AGENTS.md` para probar
+`calculateStats` (con un `Date` falso que fije el "hoy"). La UI se abre con doble clic (`file://`).

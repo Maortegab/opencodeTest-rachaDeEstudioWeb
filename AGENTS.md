@@ -25,11 +25,14 @@ Abrir `index.html` con doble clic (`file://`). No hay dev server.
   plano. `type="module"` falla bajo `file://` por CORS, así que un solo `<script src="app.js">`
   al final de `<body>` es lo que funciona hoy.
 - `app.js` no tiene `import`/`export`: es script global. Al cargar ejecuta `getElementById` de los
-  16 ids en el tope y llama `render()` inmediatamente. **Moverlo a `<head>` sin `defer` rompe la app**;
+  19 ids en el tope y llama `render()` inmediatamente. **Moverlo a `<head>` sin `defer` rompe la app**;
   si lo mueves, añade `defer`.
 - Cada `getElementById` de `app.js` debe existir como `id` en `index.html`. Al agregar campos,
   actualiza ambos archivos.
 - Sin secrets ni dependencias de red: `app.js` no usa `fetch` ni URLs externas.
+- Iconos decorativos: SVG inline en el HTML (o emoji), siempre `aria-hidden="true"`. Nada de icon
+  fonts, CDN ni assets externos; la app debe seguir funcionando con doble clic. Un elemento decorativo
+  **no añade id**: el contrato de ids solo crece cuando `app.js` lo necesita.
 
 ## Fechas: la parte más fácil de romper
 
