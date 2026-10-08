@@ -50,12 +50,18 @@ function loadSessions() {
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(parsed)) return [];
+    const today = toDateKey(new Date());
     return parsed.filter(
       (s) =>
         s &&
         typeof s.topic === "string" &&
-        Number.isFinite(s.minutes) &&
-        typeof s.date === "string"
+        typeof s.createdAt === "string" &&
+        Number.isInteger(s.minutes) &&
+        s.minutes >= 1 &&
+        s.minutes <= MAX_MINUTES &&
+        typeof s.date === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(s.date) &&
+        s.date <= today
     );
   } catch {
     return [];
@@ -66,9 +72,10 @@ function saveSessions(sessions) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
 
-function calculateStats(sessions) {
-  const days = [...new Set(sessions.map((s) => s.date))].sort();
+function calculateStats(allSessions) {
   const today = toDateKey(new Date());
+  const sessions = allSessions.filter((s) => s.date <= today);
+  const days = [...new Set(sessions.map((s) => s.date))].sort();
   const yesterday = shiftDays(today, -1);
 
   let streak = 0;
@@ -88,12 +95,33 @@ function calculateStats(sessions) {
 
   const totalMinutes = sessions.reduce((sum, s) => sum + s.minutes, 0);
 
+  const lastDate = days.length > 0 ? days[days.length - 1] : null;
+  let daysSinceLast = null;
+  if (lastDate) {
+    daysSinceLast = 0;
+    let forward = lastDate;
+    while (forward < today) {
+      forward = shiftDays(forward, 1);
+      daysSinceLast += 1;
+    }
+  }
+
   const weekStart = weekStartKey(today);
   const weekMinutes = sessions
     .filter((s) => s.date >= weekStart && s.date <= today)
     .reduce((sum, s) => sum + s.minutes, 0);
 
-  return { streak, best, alive, today, weekStart, weekMinutes, totalMinutes, totalDays: days.length };
+  return {
+    streak,
+    best,
+    alive,
+    today,
+    weekStart,
+    weekMinutes,
+    totalMinutes,
+    totalDays: days.length,
+    daysSinceLast,
+  };
 }
 
 function formatMinutes(minutes) {
@@ -114,6 +142,10 @@ function formatDate(dateKey) {
 
 function streakMessage(stats) {
   if (stats.totalDays === 0) return "Sin registros todavía. Empieza hoy.";
+  if (stats.streak === 0) {
+    const n = stats.daysSinceLast;
+    return `Racha rota: tu último registro fue hace ${n} ${n === 1 ? "día" : "días"}. Empieza una nueva hoy.`;
+  }
   if (!stats.alive) return "Racha en riesgo: hoy todavía no hay sesión. Se rompe si no estudias antes de medianoche.";
   if (stats.streak === 1) return "Racha iniciada. Vuelve mañana para mantenerla.";
   return `Racha viva: ${stats.streak} días consecutivos.`;

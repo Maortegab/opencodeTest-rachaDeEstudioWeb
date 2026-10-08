@@ -57,6 +57,26 @@ body {
   color: var(--paper);
 }
 
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  padding: 10px 16px;
+  font-weight: 600;
+  color: var(--paper);
+  background: var(--ink-strong);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transform: translateY(calc(-100% - 14px));
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .app {
   max-width: 1120px;
   margin: 0 auto;
@@ -77,6 +97,7 @@ body {
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.005em;
+  text-wrap: balance;
 }
 
 .masthead__date {
@@ -100,6 +121,7 @@ body {
   font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
 .streak__value {
@@ -359,6 +381,7 @@ body {
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   cursor: pointer;
+  touch-action: manipulation;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
@@ -393,6 +416,7 @@ body {
   border: 1px solid var(--ink-strong);
   border-radius: var(--radius);
   cursor: pointer;
+  touch-action: manipulation;
   transition: background-color 0.15s ease;
 }
 

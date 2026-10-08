@@ -4,18 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1315" media="(prefers-color-scheme: dark)">
   <meta name="description" content="Registra tus sesiones de estudio y mantén la constancia día a día.">
   <title>Racha de Estudio</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
   <div class="app">
     <header class="masthead">
       <h1 class="masthead__title">Racha de estudio</h1>
       <p class="masthead__date" id="today-date">—</p>
     </header>
 
-    <main class="main">
+    <main class="main" id="main" tabindex="-1">
       <section class="streak" id="streak-panel" aria-labelledby="streak-title">
         <h2 class="panel__title" id="streak-title">Racha actual</h2>
 
@@ -61,7 +64,7 @@
               type="text"
               id="topic"
               name="topic"
-              placeholder="Ej. Cálculo diferencial"
+              placeholder="Ej. Cálculo diferencial…"
               autocomplete="off"
               maxlength="80"
             >

@@ -31,7 +31,8 @@ Clave `localStorage`: `studyStreak.sessions`. Un array de sesiones:
 
 - `loadSessions()` / `saveSessions()` — leer y escribir storage, con filtro de entradas malformadas.
 - `calculateStats(sessions)` — función pura y sin DOM. Devuelve `{streak, best, alive, today, weekStart,
-  weekMinutes, totalMinutes, totalDays}`. **Es el corazón de la app y la única parte con lógica real.**
+  weekMinutes, totalMinutes, totalDays, daysSinceLast}`. Ignora sesiones con fecha futura.
+  **Es el corazón de la app y la única parte con lógica real.**
 - `render()` — recalcula stats y redibuja todo el DOM desde cero, sin diff. Se llama tras cada cambio.
 - `validate()` — límites de tema (1–80) y minutos (entero 1–1440).
 
