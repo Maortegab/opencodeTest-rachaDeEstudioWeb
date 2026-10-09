@@ -72,8 +72,7 @@ function saveSessions(sessions) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
 
-function calculateStats(allSessions) {
-  const today = toDateKey(new Date());
+function calculateStats(allSessions, today) {
   const sessions = allSessions.filter((s) => s.date <= today);
   const days = [...new Set(sessions.map((s) => s.date))].sort();
   const yesterday = shiftDays(today, -1);
@@ -111,6 +110,25 @@ function calculateStats(allSessions) {
     .filter((s) => s.date >= weekStart && s.date <= today)
     .reduce((sum, s) => sum + s.minutes, 0);
 
+  const minutesByDay = new Map();
+  for (const session of sessions) {
+    minutesByDay.set(session.date, (minutesByDay.get(session.date) || 0) + session.minutes);
+  }
+
+  const windowStart = shiftDays(weekStart, -28);
+  const cells = [];
+  for (let i = 0; i < RIBBON_DAYS; i += 1) {
+    const dateKey = shiftDays(windowStart, i);
+    const minutes = minutesByDay.get(dateKey) || 0;
+    cells.push({
+      dateKey,
+      minutes,
+      level: heatLevel(minutes),
+      future: dateKey > today,
+      isToday: dateKey === today,
+    });
+  }
+
   return {
     streak,
     best,
@@ -121,6 +139,7 @@ function calculateStats(allSessions) {
     totalMinutes,
     totalDays: days.length,
     daysSinceLast,
+    cells,
   };
 }
 
@@ -140,6 +159,10 @@ function formatDate(dateKey) {
   });
 }
 
+function cellTitle(dateKey, minutes) {
+  return `${formatDate(dateKey)} · ${minutes > 0 ? formatMinutes(minutes) : "sin registro"}`;
+}
+
 function streakMessage(stats) {
   if (stats.totalDays === 0) return "Sin registros todavía. Empieza hoy.";
   if (stats.streak === 0) {
@@ -151,53 +174,54 @@ function streakMessage(stats) {
   return `Racha viva: ${stats.streak} días consecutivos.`;
 }
 
+function heatLabel(stats) {
+  let loggedDays = 0;
+  let windowMinutes = 0;
+  for (const cell of stats.cells) {
+    if (cell.future) continue;
+    if (cell.minutes > 0) {
+      loggedDays += 1;
+      windowMinutes += cell.minutes;
+    }
+  }
+  const summary =
+    loggedDays === 0
+      ? `Sin actividad en las últimas ${RIBBON_WEEKS} semanas`
+      : `Últimas ${RIBBON_WEEKS} semanas: ${loggedDays} ${
+          loggedDays === 1 ? "día con sesión" : "días con sesión"
+        }, ${formatMinutes(windowMinutes)}`;
+  return `${summary}. ${streakMessage(stats)}`;
+}
+
 function streakState(stats) {
   if (stats.totalDays === 0) return "empty";
   return stats.alive ? "alive" : "risk";
 }
 
-function ribbonLevel(minutes) {
+function heatLevel(minutes) {
+  if (minutes < 1) return 0;
   if (minutes < 30) return 1;
-  if (minutes < 90) return 2;
-  return 3;
+  if (minutes < 60) return 2;
+  if (minutes < 120) return 3;
+  return 4;
 }
 
-function renderRibbon(stats, sessions) {
-  const minutesByDay = new Map();
-  for (const session of sessions) {
-    minutesByDay.set(session.date, (minutesByDay.get(session.date) || 0) + session.minutes);
-  }
-
-  const keys = [];
-  for (let back = RIBBON_DAYS - 1; back >= 0; back -= 1) {
-    keys.push(shiftDays(stats.today, -back));
-  }
-
-  let loggedDays = 0;
-  let windowMinutes = 0;
-  const cells = keys.map((key) => {
+function renderHeatmap(stats) {
+  const cells = [];
+  stats.cells.forEach((descriptor, index) => {
+    if (descriptor.future) return;
     const cell = document.createElement("li");
     cell.className = "ribbon__day";
-    const minutes = minutesByDay.get(key);
-    if (minutes === undefined) {
-      cell.title = `${formatDate(key)} · sin registro`;
-    } else {
-      cell.dataset.level = String(ribbonLevel(minutes));
-      cell.title = `${formatDate(key)} · ${formatMinutes(minutes)}`;
-      loggedDays += 1;
-      windowMinutes += minutes;
-    }
-    if (key === stats.today) cell.classList.add("is-today");
-    return cell;
+    cell.dataset.row = String(index % 7);
+    cell.dataset.col = String(Math.floor(index / 7));
+    cell.title = cellTitle(descriptor.dateKey, descriptor.minutes);
+    if (descriptor.level > 0) cell.dataset.level = String(descriptor.level);
+    if (descriptor.isToday) cell.classList.add("is-today");
+    cells.push(cell);
   });
 
   el.ribbon.replaceChildren(...cells);
-  el.ribbon.setAttribute(
-    "aria-label",
-    `Últimas ${RIBBON_WEEKS} semanas: ${loggedDays} ${
-      loggedDays === 1 ? "día con sesión" : "días con sesión"
-    }, ${formatMinutes(windowMinutes)} en total. ${streakMessage(stats)}`
-  );
+  el.ribbon.setAttribute("aria-label", heatLabel(stats));
 }
 
 function renderStats(stats) {
@@ -245,9 +269,9 @@ function renderSessions(sessions, today) {
 
 function render() {
   const sessions = loadSessions();
-  const stats = calculateStats(sessions);
+  const stats = calculateStats(sessions, toDateKey(new Date()));
   renderStats(stats);
-  renderRibbon(stats, sessions);
+  renderHeatmap(stats);
   renderSessions(sessions, stats.today);
   el.todayDate.textContent = formatDate(stats.today);
   el.clearAll.hidden = sessions.length === 0;

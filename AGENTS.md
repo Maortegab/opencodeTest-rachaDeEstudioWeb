@@ -1,21 +1,23 @@
 # AGENTS.md
 
 Aplicación web estática de contador de rachas de estudio. Tres archivos planos en la raíz:
-`index.html`, `styles.css`, `app.js`. Sin `package.json`, sin build, sin backend, sin tests.
+`index.html`, `styles.css`, `app.js`. Sin `package.json`, sin build, sin backend; tests en
+`tests/` (node --test).
 
 ## Cómo verificar
 
-No hay runner de tests ni linter. Los dos únicos chequeos disponibles:
+Los tres chequeos disponibles (no hay linter):
 
 ```powershell
 node --check "app.js"                              # sintaxis
+node --test                                         # tests: tests/*.test.js (nada de "node --test tests/")
 node -e "<regex: contar ids de app.js vs index.html>"  # contrato de ids
 ```
 
-Unit tests de `calculateStats` no tienen harness. El truco usado: leer `app.js`, quitar el
-`render();` final con regex y ejecutarlo con `new Function("module","require", src)` inyectando
-stubs de `document`, `localStorage` y `crypto`. Si agregas lógica de racha, verifícala así antes
-de dar por buena la UI.
+Los tests de lógica usan `tests/load-app.js`: lee `app.js`, quita el `render();` final con regex
+y lo ejecuta con `new Function("module","require", src)` inyectando stubs de `document`,
+`localStorage` y `crypto`. Si agregas lógica de racha, añade un caso en `tests/logic.test.js`
+antes de dar por buena la UI.
 
 Abrir `index.html` con doble clic (`file://`). No hay dev server.
 
@@ -68,6 +70,13 @@ Abrir `index.html` con doble clic (`file://`). No hay dev server.
   introduzcas estado en memoria ni mutaciones incrementales.
 - Borrar todo usa `confirm()` bloqueante, coherente con el resto de la UI en español.
 
+## Comandos
+- Tests: `node --test` (o `node --test "tests/*.test.js"`; `node --test tests/` falla en Windows)
+
+## Reglas
+- Lee `docs/constitution.md` y la spec activa (`specs/NNN-*/`) antes de tocar código.
+
+
 ## UI y validación
 
 - Tema claro/oscuro por `prefers-color-scheme` mediante variables CSS; no hardcodees colores.
@@ -77,3 +86,7 @@ Abrir `index.html` con doble clic (`file://`). No hay dev server.
 - Tras guardar: `form.reset()`, foco al primer campo, mensaje de éxito visible.
 - La UI y los mensajes están en español; los identificadores del código, en inglés.
 - El repo no lleva comentarios en el código, por convención.
+
+## Verificación
+- Corre `node --check app.js` y `node --test`. Después de cada cambio, verifica usando el MCP Chrome DevTools: abre `index.html`, prueba la funcionalidad, revisa la consola y prueba la vista móvil.
+

@@ -30,21 +30,20 @@ Clave `localStorage`: `studyStreak.sessions`. Un array de sesiones:
 ## Puntos de entrada (app.js)
 
 - `loadSessions()` / `saveSessions()` — leer y escribir storage, con filtro de entradas malformadas.
-- `calculateStats(sessions)` — función pura y sin DOM. Devuelve `{streak, best, alive, today, weekStart,
-  weekMinutes, totalMinutes, totalDays, daysSinceLast}`. Ignora sesiones con fecha futura.
-  **Es el corazón de la app y la única parte con lógica real.**
+- `calculateStats(sessions, today)` — función pura (hoy se pasa explícito, `render()` lo lee una vez).
+  Devuelve `{streak, best, alive, today, weekStart, weekMinutes, totalMinutes, totalDays,
+  daysSinceLast, cells}`: `cells` son 35 descriptores `{dateKey, minutes, level, future, isToday}`
+  de la ventana lunes-hace-4-semanas → hoy, con `heatLevel` → 0-4 (0 sin registro, 1 ≥1 min,
+  2 ≥30, 3 ≥60, 4 ≥120). Ignora sesiones con fecha futura. **El corazón de la app.**
 - `render()` — recalcula stats y redibuja todo el DOM desde cero, sin diff. Se llama tras cada cambio.
 - `validate()` — límites de tema (1–80) y minutos (entero 1–1440).
 
 ## Racha y semana (resumen)
 
 La racha cuenta **días únicos** sobre un `Set` de fechas ordenadas; hoy o ayer la mantienen viva
-(sin hoy, `alive: false` = "en riesgo"). `weekStartKey()` saca el **lunes** de la semana de una fecha
-(`(getDay() + 6) % 7`) y `weekMinutes` suma los minutos de las sesiones con `weekStart <= date <= hoy`:
-al revés que la racha, **acumula minutos y no deduplica días**. El fuego junto al número es decorativo
-(`aria-hidden`): visibilidad y tono salen de `data-state` por CSS, `app.js` no lo toca.
+(sin hoy, `alive: false` = "en riesgo"). `weekStartKey()` saca el **lunes** de la semana
+(`(getDay() + 6) % 7`) y `weekMinutes` suma minutos con `weekStart <= date <= hoy`: al revés que
+la racha, **acumula minutos y no deduplica días**.
 
 ## Verificar cambios
-
-`node --check app.js` para sintaxis; el harness de `new Function` de `AGENTS.md` para probar
-`calculateStats` (con un `Date` falso que fije el "hoy"). La UI se abre con doble clic (`file://`).
+`node --check app.js` (sintaxis) y `node --test` (tests en `tests/`, harness `tests/load-app.js`). UI con doble clic (`file://`).

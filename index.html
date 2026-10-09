@@ -35,7 +35,25 @@
         </p>
         <p class="streak__status" id="streak-status">Sin registros todavía.</p>
 
-        <ol class="ribbon" id="ribbon" role="img" aria-label="Actividad de las últimas cinco semanas."></ol>
+        <div class="ribbon-frame">
+          <ul class="ribbon__days">
+            <li>Lun</li>
+            <li>Mar</li>
+            <li>Mié</li>
+            <li>Jue</li>
+            <li>Vie</li>
+            <li>Sáb</li>
+            <li>Dom</li>
+          </ul>
+          <ol class="ribbon" id="ribbon" role="img" aria-label="Actividad de las últimas cinco semanas."></ol>
+        </div>
+        <ul class="ribbon__legend">
+          <li class="ribbon__legend-item"><span class="ribbon__legend-swatch ribbon__legend-swatch--empty"></span>sin registro</li>
+          <li class="ribbon__legend-item"><span class="ribbon__legend-swatch" data-level="1"></span>&lt;30 min</li>
+          <li class="ribbon__legend-item"><span class="ribbon__legend-swatch" data-level="2"></span>30-59 min</li>
+          <li class="ribbon__legend-item"><span class="ribbon__legend-swatch" data-level="3"></span>60-119 min</li>
+          <li class="ribbon__legend-item"><span class="ribbon__legend-swatch" data-level="4"></span>120+ min</li>
+        </ul>
         <p class="ribbon__caption">Esta semana: <span class="ribbon__caption-value" id="stat-week-time">0 min</span></p>
 
         <dl class="stats">
